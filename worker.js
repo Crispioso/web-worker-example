@@ -1,3 +1,10 @@
+var domain,
+	url,
+	latestData,
+	domainSet;
+
+/* Request data */
+
 // Function to perform Ajax request
 var ajax = function(url, data, callback, type) {
 	var data_array, data_string, idx, req, value;
@@ -29,10 +36,8 @@ var ajax = function(url, data, callback, type) {
 	return req;
 };
 
-// Perform ajax request and send response back to window
-var url = "https://www.ons.gov.uk/data",
-	latestData;
-function requestLatestData() {
+// Perform ajax request and send response back to window	
+function requestLatestData(url) {
 	ajax(url, null, function(data) {
 	   latestData = data;
 	   self.postMessage(data);
@@ -41,10 +46,42 @@ function requestLatestData() {
 
 // Listen for messages from window
 onmessage = function(e) {
+	// Update domain from window
+	if (!domainSet && e.data.domain !== "") {
+		domain = e.data.domain;
+		// setupWebsocket(domain);
+	}
+	
 	// Return latest data on request
 	if (e.data.latestData) {
-		requestLatestData();
+		// url = "//" + domain + "/data";
+		url = "https://www.ons.gov.uk/data"
+		requestLatestData(url);
 	}
 }
 
+
+/* Websocket */
+
+function setupWebsocket(domain) {
+	var connection = new WebSocket('ws://' + domain + '/zebedee', ['soap', 'xmpp']);
+	
+	// When the connection is open, send some data to the server
+	connection.onopen = function () {
+		connection.send('Ping'); // Send the message 'Ping' to the server
+	};
+	
+	// Log errors
+	connection.onerror = function (error) {
+		console.log('WebSocket Error ', error);
+	};
+	
+	// Log messages from the server
+	connection.onmessage = function (e) {
+		console.log('Server: ', e.data);
+	};
+	
+	// Only allow domain to be set once (on initial load)
+	domainSet = true;
+}
 
