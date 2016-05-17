@@ -8,7 +8,7 @@ myWorker.onmessage = function(message) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-	// Get latest data
+	// Get latest data on button click
 	var requestTrigger = document.getElementById("get-data");
 	requestTrigger.addEventListener('click', function() {
 		workerMessage.latestData = true;

@@ -1,6 +1,5 @@
 var domain,
 	url,
-	latestData,
 	domainSet;
 
 /* Request data */
@@ -37,12 +36,19 @@ var ajax = function(url, data, callback, type) {
 };
 
 // Perform ajax request and send response back to window	
-function requestLatestData(url) {
+function requestLatestData(url, response) {
 	ajax(url, null, function(data) {
-	   latestData = data;
-	   self.postMessage(data);
-	}, 'GET');	
+	   // self.postMessage(data);
+	   response(data);
+	});	
 }
+
+// Store latest data for first time on load
+// url = "https://www.ons.gov.uk/data";
+// requestLatestData(url, response = function(data) {
+	
+// });
+
 
 // Listen for messages from window
 onmessage = function(e) {
@@ -56,7 +62,9 @@ onmessage = function(e) {
 	if (e.data.latestData) {
 		// url = "//" + domain + "/data";
 		url = "https://www.ons.gov.uk/data"
-		requestLatestData(url);
+		requestLatestData(url, response = function(data) {
+			self.postMessage(data);
+		});
 	}
 }
 
